@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conecta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#9333ea',
+              600: '#7e22ce',
+              700: '#6b21a8',
+              800: '#581c87'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body{ font-family:'Inter',sans-serif; }
+    @keyframes float{
+      0%{ transform:translateY(0px); }
+      50%{ transform:translateY(-10px); }
+      100%{ transform:translateY(0px); }
+    }
+    .floating{ animation:float 6s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-[#f8f8fc] text-gray-800">
+
+  <div class="flex min-h-screen w-full">
+
+    <!-- ===================================== -->
+    <!-- SIDEBAR -->
+    <!-- ===================================== -->
+    <aside class="w-72 bg-white border-r border-gray-100 p-6 flex flex-col gap-1 shrink-0 sticky top-0 h-screen overflow-y-auto">
+
+      <!-- Logo -->
+      <div class="flex items-center gap-3 mb-8 px-1">
+        <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-fuchsia-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
+          C
+        </div>
+        <div>
+          <p class="font-bold text-gray-900 leading-tight">Conecta</p>
+          <p class="text-xs text-gray-400">Encuentra tu espacio</p>
+        </div>
+      </div>
+
+      <!-- Navegación -->
+      <nav class="flex flex-col gap-1 text-base text-gray-600">
+        <a href="{% url 'plataforma:inicio' %}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-50 text-brand-600 font-semibold transition">
+          <span class="text-lg">🏠</span> Inicio
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">🧭</span> Explorar
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">📋</span> Actividades
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">👥</span> Grupos
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">💬</span> Mensajes
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">🔖</span> Guardados
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">👤</span> Perfil
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+          <span class="text-lg">⚙️</span> Configuración
+        </a>
+        <form method="post" action="{% url 'plataforma:logout' %}" class="mt-1">
+          {% csrf_token %}
+          <button type="submit"
+                  class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-500 text-left transition">
+            <span class="text-lg">🚪</span> Cerrar sesión
+          </button>
+        </form>
+      </nav>
+
+      <!-- Tarjeta ilustrada -->
+      <div class="mt-auto relative overflow-hidden bg-brand-50 rounded-2xl p-5 flex items-center gap-3">
+        <svg viewBox="0 0 60 60" class="w-12 h-12 shrink-0 floating" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="28" fill="#e9d5ff"/>
+          <circle cx="21" cy="26" r="7" fill="#fbbf6b"/>
+          <circle cx="39" cy="26" r="7" fill="#fca5f1"/>
+          <path d="M12 46 Q30 30 48 46 Z" fill="#ffffff"/>
+        </svg>
+        <p class="text-sm text-gray-700 font-medium leading-snug">
+          Pequeñas conexiones, grandes momentos.
+        </p>
+      </div>
+    </aside>
+
+    <!-- ===================================== -->
+    <!-- CONTENIDO -->
+    <!-- ===================================== -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- Topbar -->
+      <header class="flex items-center justify-between gap-6 px-8 py-5 bg-white border-b border-gray-100 sticky top-0 z-20">
+        <div class="relative flex-1 max-w-xl">
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Busca actividades, hobbies o personas..."
+            class="w-full bg-[#f8f8fc] rounded-xl pl-12 pr-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"
+          >
+        </div>
+        <div class="flex items-center gap-5 shrink-0">
+          <button class="relative text-gray-400 hover:text-brand-500 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.65V5a2 2 0 10-4 0v.35A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-fuchsia-500 rounded-full border-2 border-white"></span>
+          </button>
+          {% if request.user.is_authenticated %}
+            <span class="text-base text-gray-700 font-medium">Hola, {{ request.user.first_name|default:request.user.username }}</span>
+          {% endif %}
+          <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-fuchsia-500 rounded-full flex items-center justify-center text-white text-base font-bold shadow-sm">
+            {{ request.user.first_name|default:request.user.username|first|upper }}
+          </div>
+        </div>
+      </header>
+
+      <!-- Contenido principal -->
+      <main class="flex-1">
+        {% block content %}{% endblock %}
+      </main>
+
+    </div>
+  </div>
+
+</body>
+</html>

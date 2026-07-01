@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conecta | Crea tu cuenta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#9333ea',
+                            600: '#7e22ce',
+                            700: '#6b21a8',
+                            800: '#581c87'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body{ font-family:'Inter',sans-serif; }
+        @keyframes float{
+            0%{ transform:translateY(0px); }
+            50%{ transform:translateY(-12px); }
+            100%{ transform:translateY(0px); }
+        }
+        .floating{ animation:float 6s ease-in-out infinite; }
+        @keyframes fade{
+            from{ opacity:0; transform:translateY(20px); }
+            to{ opacity:1; transform:translateY(0); }
+        }
+        .fade{ animation:fade .8s ease; }
+        .glass{ backdrop-filter:blur(18px); background:rgba(255,255,255,.10); }
+    </style>
+</head>
+<body class="bg-gray-100">
+<div class="min-h-screen flex">
+    <!-- ===================================== -->
+    <!-- PANEL IZQUIERDO -->
+    <!-- ===================================== -->
+    <div class="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-violet-700 via-brand-600 to-fuchsia-500">
+        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-2xl floating"></div>
+        <div class="absolute bottom-0 -left-24 w-[30rem] h-[30rem] rounded-full bg-white/10 blur-3xl floating"></div>
+        <div class="absolute top-1/3 left-16 w-24 h-24 rounded-full bg-white/20 floating"></div>
+        <div class="absolute bottom-20 right-20 w-12 h-12 rounded-full bg-white/20 floating"></div>
+
+        <div class="relative z-10 flex flex-col justify-center items-center text-center text-white px-16 w-full">
+            <div class="absolute top-10 left-10 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white text-brand-600 font-bold text-xl flex items-center justify-center shadow-lg">C</div>
+                <span class="font-bold text-xl">Conecta</span>
+            </div>
+
+            <svg viewBox="0 0 430 340" class="w-[360px] drop-shadow-2xl floating mb-10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="215" cy="170" r="150" fill="rgba(255,255,255,0.08)"/>
+                <circle cx="215" cy="170" r="110" fill="rgba(255,255,255,0.10)"/>
+                <circle cx="215" cy="130" r="34" fill="#fde68a"/>
+                <path d="M155 250 Q215 190 275 250 L275 270 L155 270 Z" fill="#ffffff"/>
+                <circle cx="120" cy="150" r="24" fill="#fca5f1"/>
+                <path d="M78 235 Q120 195 162 235 L162 250 L78 250 Z" fill="#f3e8ff"/>
+                <circle cx="310" cy="150" r="24" fill="#93c5fd"/>
+                <path d="M268 235 Q310 195 352 235 L352 250 L268 250 Z" fill="#f3e8ff"/>
+                <path d="M140 165 Q178 140 196 132" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="4 6" opacity="0.7"/>
+                <path d="M290 165 Q252 140 234 132" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="4 6" opacity="0.7"/>
+                <circle cx="90" cy="80" r="16" fill="#ffffff" opacity="0.9"/>
+                <text x="90" y="86" font-size="16" text-anchor="middle">🎨</text>
+                <circle cx="345" cy="90" r="16" fill="#ffffff" opacity="0.9"/>
+                <text x="345" y="96" font-size="16" text-anchor="middle">🎸</text>
+                <circle cx="215" cy="40" r="16" fill="#ffffff" opacity="0.9"/>
+                <text x="215" y="46" font-size="16" text-anchor="middle">⚽</text>
+            </svg>
+
+            <h1 class="text-4xl font-extrabold leading-tight max-w-xl">
+                Encuentra tu tribu,
+                <span class="text-yellow-300">una actividad a la vez.</span>
+            </h1>
+
+            <p class="mt-6 text-lg text-purple-100 leading-relaxed max-w-md">
+                Únete a personas que comparten tus mismos hobbies, organiza planes y descubre grupos cerca de ti.
+            </p>
+
+            <div class="grid grid-cols-2 gap-5 mt-10 text-left w-full max-w-md">
+                <div class="glass rounded-2xl p-5">
+                    <h3 class="font-bold text-lg">🎨 Eventos</h3>
+                    <p class="text-purple-100 mt-2 text-sm">Participa en cientos de actividades.</p>
+                </div>
+                <div class="glass rounded-2xl p-5">
+                    <h3 class="font-bold text-lg">👥 Comunidad</h3>
+                    <p class="text-purple-100 mt-2 text-sm">Conoce personas con tus gustos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FORMULARIO -->
+    <!-- ===================================== -->
+    <div class="w-full lg:w-1/2 flex justify-center items-center p-8 bg-[#f8f8fc] fade overflow-y-auto">
+        <div class="bg-white shadow-2xl rounded-3xl w-full max-w-md p-10 my-8">
+            <div class="lg:hidden flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-brand-500 flex justify-center items-center text-white text-2xl font-bold shadow-lg">C</div>
+                <div>
+                    <h1 class="font-bold text-2xl text-gray-900">Conecta</h1>
+                    <p class="text-gray-500">Tu comunidad comienza aquí.</p>
+                </div>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-gray-900">Crea tu cuenta</h2>
+            <p class="text-gray-500 text-lg mt-3 mb-8 leading-relaxed">
+                Empieza a conectar con personas que comparten tus mismos intereses.
+            </p>
+
+            {% if form.non_field_errors %}
+            <div class="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-600 p-4">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                <!-- Nombre -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Nombre</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.364 4.56a9 9 0 01-13.243 13.243z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0a3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}"
+                            placeholder="Tu nombre"
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                    </div>
+                    {% if form.first_name.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.first_name.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Usuario -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Usuario</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <input type="text" name="username" value="{{ form.username.value|default:'' }}"
+                            placeholder="nombredeusuario"
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                    </div>
+                    {% if form.username.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.username.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Correo -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Correo electrónico</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                            placeholder="tucorreo@ejemplo.com"
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                    </div>
+                    {% if form.email.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.email.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Contraseña -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Contraseña</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <rect x="5" y="11" width="14" height="10" rx="2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V8a4 4 0 118 0v3"/>
+                            </svg>
+                        </div>
+                        <input id="password1" type="password" name="password1"
+                            placeholder="••••••••••••"
+                            class="w-full pl-12 pr-14 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                        <button type="button" onclick="togglePassword('password1')"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-500 transition">👁</button>
+                    </div>
+                    {% if form.password1.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.password1.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Confirmar contraseña -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Confirma tu contraseña</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <rect x="5" y="11" width="14" height="10" rx="2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V8a4 4 0 118 0v3"/>
+                            </svg>
+                        </div>
+                        <input id="password2" type="password" name="password2"
+                            placeholder="••••••••••••"
+                            class="w-full pl-12 pr-14 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                        <button type="button" onclick="togglePassword('password2')"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-500 transition">👁</button>
+                    </div>
+                    {% if form.password2.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.password2.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-brand-500 hover:bg-brand-600 text-white text-lg font-semibold rounded-xl py-4 transition duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                    Crear cuenta
+                </button>
+
+                <div class="relative py-2">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="bg-white px-4 text-gray-400 text-sm">o</span>
+                    </div>
+                </div>
+
+                <p class="text-center text-gray-500">
+                    ¿Ya tienes una cuenta?
+                    <a href="{% url 'plataforma:login' %}" class="font-semibold text-brand-500 hover:text-brand-600">Inicia sesión</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(id) {
+        const field = document.getElementById(id);
+        field.type = field.type === "password" ? "text" : "password";
+    }
+</script>
+
+<!-- Fondo decorativo para móviles -->
+<div class="lg:hidden fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-brand-200 opacity-30 blur-3xl"></div>
+    <div class="absolute bottom-0 -left-20 w-72 h-72 rounded-full bg-purple-300 opacity-30 blur-3xl"></div>
+</div>
+
+</body>
+</html>
