@@ -76,19 +76,59 @@
         {% if conversacion_actual %}
 
           <!-- Encabezado del chat -->
-          <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 shrink-0">
-            <div class="w-11 h-11 bg-gradient-to-br from-brand-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0">
-              {{ conversacion_actual.otro_usuario.first_name|default:conversacion_actual.otro_usuario.username|first|upper }}
+          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-11 h-11 bg-gradient-to-br from-brand-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0">
+                {{ conversacion_actual.otro_usuario.first_name|default:conversacion_actual.otro_usuario.username|first|upper }}
+              </div>
+              <div class="min-w-0">
+                <p class="font-semibold text-gray-900 truncate">
+                  {{ conversacion_actual.otro_usuario.first_name|default:conversacion_actual.otro_usuario.username }}
+                </p>
+                <p class="text-xs text-gray-400">
+                  {% if conversacion_actual.otro_usuario_en_linea %}En línea{% else %}Desconectado{% endif %}
+                </p>
+              </div>
             </div>
-            <div class="min-w-0">
-              <p class="font-semibold text-gray-900 truncate">
-                {{ conversacion_actual.otro_usuario.first_name|default:conversacion_actual.otro_usuario.username }}
-              </p>
-              <p class="text-xs text-gray-400">
-                {% if conversacion_actual.otro_usuario_en_linea %}En línea{% else %}Desconectado{% endif %}
-              </p>
+
+            <!-- Menú de seguridad -->
+            <div class="relative shrink-0">
+              <button onclick="document.getElementById('menu-seguridad').classList.toggle('hidden')"
+                      class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-50 text-gray-400 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v.01M12 12v.01M12 18v.01"/>
+                </svg>
+              </button>
+              <div id="menu-seguridad"
+                   class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-100 shadow-lg py-1 z-30">
+                <a href="{% url 'plataforma:reportar_usuario' conversacion_actual.otro_usuario.id %}"
+                   class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                  🚩 Reportar usuario
+                </a>
+                {% if usuario_bloqueado %}
+                  <form method="post" action="{% url 'plataforma:desbloquear_usuario' conversacion_actual.otro_usuario.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                      ✅ Desbloquear
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'plataforma:bloquear_usuario' conversacion_actual.otro_usuario.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition">
+                      🚫 Bloquear usuario
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
             </div>
           </div>
+
+          {% if usuario_bloqueado %}
+            <div class="px-6 py-3 bg-red-50 border-b border-red-100 text-sm text-red-600 shrink-0">
+              Bloqueaste a este usuario. No pueden enviarse mensajes hasta que lo desbloquees.
+            </div>
+          {% endif %}
 
           <!-- Mensajes -->
           <div class="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
@@ -116,12 +156,13 @@
             <input
               type="text"
               name="contenido"
-              placeholder="Escribe un mensaje..."
+              placeholder="{% if usuario_bloqueado %}Desbloquea al usuario para escribirle{% else %}Escribe un mensaje...{% endif %}"
               autocomplete="off"
-              class="flex-1 bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"
+              {% if usuario_bloqueado %}disabled{% endif %}
+              class="flex-1 bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition disabled:opacity-50"
             >
-            <button type="submit"
-                    class="shrink-0 w-11 h-11 bg-brand-500 hover:bg-brand-600 rounded-xl flex items-center justify-center text-white transition">
+            <button type="submit" {% if usuario_bloqueado %}disabled{% endif %}
+                    class="shrink-0 w-11 h-11 bg-brand-500 hover:bg-brand-600 rounded-xl flex items-center justify-center text-white transition disabled:opacity-50 disabled:hover:bg-brand-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-7-9-7-9 7 9 7z" transform="rotate(90 12 12)"/>
               </svg>

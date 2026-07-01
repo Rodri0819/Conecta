@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-xl mx-auto px-8 py-12">
+
+  <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+    <div class="flex items-center gap-3 mb-1">
+      <span class="text-2xl">🚩</span>
+      <h1 class="font-extrabold text-2xl text-gray-900">Reportar a {{ usuario_reportado.first_name|default:usuario_reportado.username }}</h1>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">
+      Tu reporte es confidencial. Nuestro equipo lo revisará y tomará las medidas necesarias,
+      que pueden incluir la suspensión de la cuenta o reportarla a las autoridades si corresponde.
+    </p>
+
+    <form method="post" class="flex flex-col gap-5">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Motivo del reporte</label>
+        <select name="motivo" required
+                class="w-full bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition">
+          {% for value, label in form.motivo.field.choices %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cuéntanos más (opcional)</label>
+        <textarea name="descripcion" rows="4"
+                  placeholder="Describe lo que pasó, con el mayor detalle posible..."
+                  class="w-full bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"></textarea>
+      </div>
+
+      <div class="flex items-center gap-3 mt-2">
+        <button type="submit"
+                class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition">
+          Enviar reporte
+        </button>
+        <a href="{% url 'plataforma:mensajes' %}"
+           class="px-6 py-3 rounded-xl font-semibold text-sm text-gray-500 hover:bg-gray-50 transition">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-gray-100">
+      <p class="text-xs text-gray-400 leading-relaxed">
+        Si sientes que estás en peligro inmediato, contacta directamente a la policía o a las líneas de emergencia
+        de tu país. Reportar aquí no reemplaza una denuncia formal ante las autoridades.
+      </p>
+    </div>
+  </div>
+
+</div>
+</div>
+{% endblock %}

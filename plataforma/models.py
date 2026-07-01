@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class Categoria(models.Model):
@@ -16,10 +17,33 @@ class Perfil(models.Model):
     bio = models.TextField(blank=True)
     intereses = models.ManyToManyField(Categoria, related_name='interesados', blank=True)
 
+    fecha_nacimiento = models.DateField(null=True, blank=True)
+    acepto_terminos = models.BooleanField(default=False)
+    documento_identidad = models.ImageField(
+        upload_to='identificaciones/', blank=True, null=True,
+        help_text='Documento subido por el usuario para verificación manual.'
+    )
+    verificado = models.BooleanField(
+        default=False,
+        help_text='Se marca en True solo cuando un administrador revisó y aprobó el documento.'
+    )
+    suspendido = models.BooleanField(
+        default=False,
+        help_text='Cuenta suspendida por un administrador tras un reporte.'
+    )
+
     def __str__(self):
         return self.user.username
 
-
+    @property
+    def edad(self):
+        if not self.fecha_nacimiento:
+            return None
+        hoy = timezone.now().date()
+        return hoy.year - self.fecha_nacimiento.year - (
+            (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+        )
+    
 class Grupo(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
@@ -88,3 +112,44 @@ class Mensaje(models.Model):
 
     def __str__(self):
         return f'{self.autor}: {self.contenido[:30]}'
+
+
+class Reporte(models.Model):
+    MOTIVO_CHOICES = [
+        ('acoso', 'Acoso o comportamiento inapropiado'),
+        ('suplantacion', 'Suplantación de identidad'),
+        ('contenido', 'Contenido inapropiado u ofensivo'),
+        ('menor_riesgo', 'Sospecha de riesgo hacia un menor'),
+        ('spam', 'Spam o cuenta falsa'),
+        ('otro', 'Otro motivo'),
+    ]
+
+    reportante = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reportes_hechos'
+    )
+    usuario_reportado = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reportes_recibidos'
+    )
+    motivo = models.CharField(max_length=20, choices=MOTIVO_CHOICES)
+    descripcion = models.TextField(blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    revisado = models.BooleanField(default=False)
+    accion_tomada = models.TextField(blank=True, help_text='Notas del administrador tras revisar.')
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f'Reporte de {self.reportante} sobre {self.usuario_reportado} ({self.get_motivo_display()})'
+
+
+class Bloqueo(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bloqueos_hechos')
+    bloqueado = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bloqueos_recibidos')
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('usuario', 'bloqueado')
+
+    def __str__(self):
+        return f'{self.usuario} bloqueó a {self.bloqueado}'

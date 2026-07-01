@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages as django_messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.urls import reverse
-from .models import Actividad, Grupo, Categoria, Conversacion, Mensaje
-from .forms import RegistroForm, ActividadForm, GrupoForm
+from .models import (
+    Actividad, Grupo, Categoria, Conversacion, Mensaje,
+    Perfil, Reporte, Bloqueo,
+)
+from .forms import RegistroForm, ActividadForm, GrupoForm, ReporteForm
 
 
 @login_required(login_url='plataforma:login')
@@ -28,10 +32,25 @@ def registro(request):
         return redirect('plataforma:inicio')
 
     if request.method == 'POST':
-        form = RegistroForm(request.POST)
+        form = RegistroForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
+
+            # Creamos el Perfil con los datos de seguridad recolectados en el registro
+            Perfil.objects.create(
+                user=user,
+                fecha_nacimiento=form.cleaned_data['fecha_nacimiento'],
+                acepto_terminos=form.cleaned_data['acepto_terminos'],
+                documento_identidad=form.cleaned_data.get('documento_identidad'),
+                verificado=False,  # queda pendiente hasta revisión de un administrador
+            )
+
             login(request, user)
+            django_messages.success(
+                request,
+                'Cuenta creada correctamente. Si subiste tu identificación, '
+                'la revisaremos pronto para verificar tu cuenta.'
+            )
             return redirect('plataforma:inicio')
     else:
         form = RegistroForm()
@@ -95,18 +114,27 @@ def detalle_actividad(request, actividad_id):
 
 @login_required(login_url='plataforma:login')
 def mensajes(request):
+    # Excluimos conversaciones con usuarios que el usuario actual bloqueó
+    ids_bloqueados = Bloqueo.objects.filter(usuario=request.user).values_list('bloqueado_id', flat=True)
+
     conversaciones = list(
         request.user.conversaciones.prefetch_related('participantes', 'mensajes')
     )
 
+    conversaciones_visibles = []
     for conv in conversaciones:
-        conv.otro_usuario = conv.otro_participante(request.user)
+        otro = conv.otro_participante(request.user)
+        if otro and otro.id in ids_bloqueados:
+            continue  # ocultamos conversaciones con usuarios bloqueados
+        conv.otro_usuario = otro
         conv.ultimo_mensaje = conv.mensajes.last()
         conv.no_leidos = conv.mensajes.filter(leido=False).exclude(autor=request.user).count()
         conv.otro_usuario_en_linea = False
+        conversaciones_visibles.append(conv)
 
     conversacion_actual = None
     mensajes_lista = []
+    usuario_bloqueado = False
 
     conversacion_id = request.GET.get('conversacion')
     if conversacion_id:
@@ -116,6 +144,8 @@ def mensajes(request):
         conversacion_actual.otro_usuario = conversacion_actual.otro_participante(request.user)
         conversacion_actual.otro_usuario_en_linea = False
 
+        usuario_bloqueado = conversacion_actual.otro_usuario_id in ids_bloqueados if conversacion_actual.otro_usuario else False
+
         conversacion_actual.mensajes.exclude(autor=request.user).update(leido=True)
 
         mensajes_lista = list(conversacion_actual.mensajes.select_related('autor'))
@@ -123,9 +153,10 @@ def mensajes(request):
             m.es_propio = (m.autor_id == request.user.id)
 
     return render(request, 'plataforma/mensajes.html', {
-        'conversaciones': conversaciones,
+        'conversaciones': conversaciones_visibles,
         'conversacion_actual': conversacion_actual,
         'mensajes': mensajes_lista,
+        'usuario_bloqueado': usuario_bloqueado,
     })
 
 
@@ -134,7 +165,11 @@ def enviar_mensaje(request, conversacion_id):
     conversacion = get_object_or_404(
         Conversacion, id=conversacion_id, participantes=request.user
     )
-    if request.method == 'POST':
+
+    otro_usuario = conversacion.otro_participante(request.user)
+    bloqueado = Bloqueo.objects.filter(usuario=request.user, bloqueado=otro_usuario).exists() if otro_usuario else False
+
+    if request.method == 'POST' and not bloqueado:
         contenido = request.POST.get('contenido', '').strip()
         if contenido:
             Mensaje.objects.create(
@@ -272,3 +307,53 @@ def explorar(request):
         'q': q,
         'categoria_actual': categoria_id,
     })
+
+
+# -----------------------------------------------------------------
+# SEGURIDAD: REPORTES Y BLOQUEOS
+# -----------------------------------------------------------------
+
+@login_required(login_url='plataforma:login')
+def reportar_usuario(request, usuario_id):
+    usuario_reportado = get_object_or_404(User, id=usuario_id)
+
+    if request.method == 'POST':
+        form = ReporteForm(request.POST)
+        if form.is_valid() and usuario_reportado != request.user:
+            Reporte.objects.create(
+                reportante=request.user,
+                usuario_reportado=usuario_reportado,
+                motivo=form.cleaned_data['motivo'],
+                descripcion=form.cleaned_data['descripcion'],
+            )
+            django_messages.success(
+                request,
+                'Gracias por avisarnos. Nuestro equipo revisará este reporte lo antes posible.'
+            )
+    else:
+        form = ReporteForm()
+
+    return render(request, 'plataforma/reportar_usuario.html', {
+        'form': form,
+        'usuario_reportado': usuario_reportado,
+    })
+
+
+@login_required(login_url='plataforma:login')
+def bloquear_usuario(request, usuario_id):
+    usuario_bloqueado = get_object_or_404(User, id=usuario_id)
+
+    if request.method == 'POST' and usuario_bloqueado != request.user:
+        Bloqueo.objects.get_or_create(usuario=request.user, bloqueado=usuario_bloqueado)
+        django_messages.success(request, f'Bloqueaste a {usuario_bloqueado.first_name or usuario_bloqueado.username}.')
+
+    return redirect(request.META.get('HTTP_REFERER') or reverse('plataforma:mensajes'))
+
+
+@login_required(login_url='plataforma:login')
+def desbloquear_usuario(request, usuario_id):
+    if request.method == 'POST':
+        Bloqueo.objects.filter(usuario=request.user, bloqueado_id=usuario_id).delete()
+        django_messages.success(request, 'Usuario desbloqueado.')
+
+    return redirect(request.META.get('HTTP_REFERER') or reverse('plataforma:mensajes'))

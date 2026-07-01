@@ -99,8 +99,8 @@
                     <p class="text-purple-100 mt-2 text-sm">Participa en cientos de actividades.</p>
                 </div>
                 <div class="glass rounded-2xl p-5">
-                    <h3 class="font-bold text-lg">👥 Comunidad</h3>
-                    <p class="text-purple-100 mt-2 text-sm">Conoce personas con tus gustos.</p>
+                    <h3 class="font-bold text-lg">🛡️ Comunidad segura</h3>
+                    <p class="text-purple-100 mt-2 text-sm">Verificamos cuentas para cuidar a nuestra comunidad.</p>
                 </div>
             </div>
         </div>
@@ -120,9 +120,15 @@
             </div>
 
             <h2 class="text-4xl font-extrabold text-gray-900">Crea tu cuenta</h2>
-            <p class="text-gray-500 text-lg mt-3 mb-8 leading-relaxed">
+            <p class="text-gray-500 text-lg mt-3 mb-6 leading-relaxed">
                 Empieza a conectar con personas que comparten tus mismos intereses.
             </p>
+
+            <!-- Aviso de seguridad -->
+            <div class="mb-6 rounded-xl bg-brand-50 border border-brand-100 text-brand-700 text-sm p-4 flex gap-3">
+                <span class="text-lg leading-none">🛡️</span>
+                <p>Conecta es una comunidad de mayores de 18 años. Pedimos tu fecha de nacimiento y, opcionalmente, un documento para verificar tu cuenta y mantener este espacio seguro para todos.</p>
+            </div>
 
             {% if form.non_field_errors %}
             <div class="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-600 p-4">
@@ -130,7 +136,7 @@
             </div>
             {% endif %}
 
-            <form method="POST" class="space-y-5">
+            <form method="POST" enctype="multipart/form-data" class="space-y-5">
                 {% csrf_token %}
 
                 <!-- Nombre -->
@@ -188,6 +194,24 @@
                     {% endif %}
                 </div>
 
+                <!-- Fecha de nacimiento (verificación de edad) -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-semibold">Fecha de nacimiento</label>
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento.value|default:'' }}"
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Debes tener 18 años o más para usar Conecta.</p>
+                    {% if form.fecha_nacimiento.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.fecha_nacimiento.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
                 <!-- Contraseña -->
                 <div>
                     <label class="block mb-2 text-gray-700 font-semibold">Contraseña</label>
@@ -227,6 +251,44 @@
                     </div>
                     {% if form.password2.errors %}
                     <p class="text-sm text-red-500 mt-1">{{ form.password2.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Subida de identificación -->
+                <div class="rounded-xl border border-dashed border-gray-300 p-4">
+                    <label class="block mb-1 text-gray-700 font-semibold flex items-center gap-2">
+                        🪪 Verifica tu identidad
+                        <span class="text-xs font-normal text-gray-400">(opcional, recomendado)</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mb-3">
+                        Sube una foto de tu cédula o carnet. Solo la usamos para confirmar que eres mayor de edad
+                        y una persona real; un administrador la revisa y luego se elimina el acceso público a la imagen.
+                    </p>
+                    <input type="file" name="documento_identidad" accept="image/*"
+                        class="w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl
+                               file:border-0 file:bg-brand-50 file:text-brand-600 file:font-semibold
+                               hover:file:bg-brand-100 transition">
+                    {% if form.documento_identidad.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.documento_identidad.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Aceptación de términos -->
+                <div>
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="acepto_terminos" required
+                            class="mt-1 w-4 h-4 rounded border-gray-300 text-brand-500 focus:ring-brand-400">
+                        <span class="text-sm text-gray-600 leading-relaxed">
+                            He leído y acepto los
+                            <a href="#" class="font-semibold text-brand-500 hover:text-brand-600">Términos de uso</a>
+                            y las
+                            <a href="#" class="font-semibold text-brand-500 hover:text-brand-600">Normas de convivencia</a>
+                            de Conecta. Entiendo que las cuentas con conductas de riesgo hacia otros usuarios,
+                            especialmente menores de edad, serán reportadas a las autoridades correspondientes.
+                        </span>
+                    </label>
+                    {% if form.acepto_terminos.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.acepto_terminos.errors|join:", " }}</p>
                     {% endif %}
                 </div>
 
