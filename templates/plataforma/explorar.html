@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-[1800px] mx-auto px-8 xl:px-12 py-8">
+
+  <!-- Encabezado -->
+  <div class="mb-8">
+    <h1 class="font-extrabold text-2xl text-gray-900">Explorar</h1>
+    <p class="text-sm text-gray-500 mt-1">Descubre actividades y grupos que combinan contigo.</p>
+  </div>
+
+  <!-- Buscador -->
+  <form method="get" class="mb-6">
+    <input type="hidden" name="tipo" value="{{ tipo_actual }}">
+    <div class="relative max-w-2xl">
+      <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+        </svg>
+      </div>
+      <input
+        type="text" name="q" value="{{ q|default:'' }}"
+        placeholder="Busca actividades, grupos o intereses..."
+        class="w-full bg-white rounded-xl pl-12 pr-4 py-3.5 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition shadow-sm"
+      >
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex items-center justify-between gap-4 mt-6 flex-wrap">
+      <div class="flex gap-2 bg-white border border-gray-100 rounded-full p-1 shadow-sm">
+        <a href="?tipo=actividades&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}"
+           class="px-5 py-2 rounded-full text-sm font-semibold transition {% if tipo_actual == 'actividades' %}bg-brand-500 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+          🎉 Actividades
+        </a>
+        <a href="?tipo=grupos&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}"
+           class="px-5 py-2 rounded-full text-sm font-semibold transition {% if tipo_actual == 'grupos' %}bg-brand-500 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+          👥 Grupos
+        </a>
+      </div>
+
+      <select name="categoria"
+              class="bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"
+              onchange="this.form.submit()">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.id }}" {% if categoria_actual == cat.id|stringformat:"s" %}selected{% endif %}>
+            {{ cat.icono|default:"⭐" }} {{ cat.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  <!-- Chips de categorías rápidas -->
+  <div class="flex gap-3 mb-10 flex-wrap">
+    <a href="?tipo={{ tipo_actual }}&q={{ q|default:'' }}"
+       class="px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 border transition {% if not categoria_actual %}bg-brand-500 border-brand-500 text-white{% else %}bg-white border-gray-100 text-gray-700 hover:border-brand-200{% endif %}">
+      ✨ Todas
+    </a>
+    {% for cat in categorias %}
+      <a href="?tipo={{ tipo_actual }}&q={{ q|default:'' }}&categoria={{ cat.id }}"
+         class="px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 border transition {% if categoria_actual == cat.id|stringformat:'s' %}bg-brand-500 border-brand-500 text-white{% else %}bg-white border-gray-100 text-gray-700 hover:border-brand-200{% endif %}">
+        {{ cat.icono|default:"⭐" }} {{ cat.nombre }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Resultados -->
+  {% if tipo_actual == 'grupos' %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {% for grupo in resultados %}
+        <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300">
+          <a href="{% url 'plataforma:detalle_grupo' grupo.id %}" class="block">
+            {% if grupo.imagen %}
+              <img src="{{ grupo.imagen.url }}" class="h-32 w-full object-cover">
+            {% else %}
+              <div class="h-32 w-full bg-gradient-to-br from-violet-400 to-brand-500 flex items-center justify-center">
+                <span class="text-3xl text-white font-bold">{{ grupo.nombre|slice:":1"|upper }}</span>
+              </div>
+            {% endif %}
+          </a>
+          <div class="p-4">
+            {% if grupo.categoria %}
+              <span class="inline-block text-xs font-bold uppercase tracking-wide text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full mb-2">
+                {{ grupo.categoria.icono|default:"⭐" }} {{ grupo.categoria.nombre }}
+              </span>
+            {% endif %}
+            <a href="{% url 'plataforma:detalle_grupo' grupo.id %}">
+              <p class="font-bold text-gray-900 text-base mb-1 leading-snug hover:text-brand-600 transition">{{ grupo.nombre }}</p>
+            </a>
+            <p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ grupo.descripcion|default:"Sin descripción." }}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-400 font-medium">{{ grupo.total_miembros }} miembro{{ grupo.total_miembros|pluralize }}</span>
+              {% if request.user in grupo.miembros.all %}
+                <span class="text-sm font-semibold text-brand-600 bg-brand-50 px-4 py-2 rounded-full">Ya eres miembro</span>
+              {% else %}
+                <form method="post" action="{% url 'plataforma:unirse_grupo' grupo.id %}">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-4 py-2 rounded-full transition">
+                    Unirse
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-span-full flex flex-col items-center justify-center text-center py-20">
+          <span class="text-4xl mb-3">🔍</span>
+          <p class="font-semibold text-gray-900 mb-1">No encontramos grupos</p>
+          <p class="text-sm text-gray-400">Prueba con otra búsqueda o categoría.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {% for act in resultados %}
+        <a href="{% url 'plataforma:detalle_actividad' act.id %}"
+           class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300">
+          <div class="relative">
+            {% if act.imagen %}
+              <img src="{{ act.imagen.url }}" class="h-36 w-full object-cover">
+            {% else %}
+              <div class="h-36 w-full bg-gradient-to-br from-brand-100 to-purple-200 flex items-center justify-center">
+                <span class="text-3xl">🎉</span>
+              </div>
+            {% endif %}
+            {% if act.categoria %}
+              <span class="absolute top-3 left-3 bg-white/90 text-brand-600 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full">
+                {{ act.categoria.icono|default:"⭐" }} {{ act.categoria.nombre }}
+              </span>
+            {% endif %}
+          </div>
+          <div class="p-4">
+            <p class="font-bold text-gray-900 text-base mb-1.5 leading-snug">{{ act.titulo }}</p>
+            <p class="text-sm text-gray-500">{{ act.fecha|date:"D, j M · H:i" }}</p>
+            {% if act.lugar %}
+              <p class="text-sm text-gray-500 mt-0.5">{{ act.lugar }}</p>
+            {% endif %}
+            <div class="flex items-center justify-between mt-4">
+              <div class="flex items-center -space-x-2">
+                <div class="w-7 h-7 rounded-full bg-brand-300 border-2 border-white"></div>
+                <div class="w-7 h-7 rounded-full bg-fuchsia-300 border-2 border-white"></div>
+                <div class="w-7 h-7 rounded-full bg-violet-300 border-2 border-white"></div>
+              </div>
+              <span class="text-xs text-gray-400 font-medium">{{ act.total_participantes }} inscritos</span>
+            </div>
+          </div>
+        </a>
+      {% empty %}
+        <div class="col-span-full flex flex-col items-center justify-center text-center py-20">
+          <span class="text-4xl mb-3">🔍</span>
+          <p class="font-semibold text-gray-900 mb-1">No encontramos actividades</p>
+          <p class="text-sm text-gray-400">Prueba con otra búsqueda o categoría.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% endif %}
+
+  <!-- Paginación -->
+  {% if resultados.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-10">
+      {% if resultados.has_previous %}
+        <a href="?tipo={{ tipo_actual }}&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}&page={{ resultados.previous_page_number }}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm text-gray-600 hover:bg-gray-50 transition">
+          ← Anterior
+        </a>
+      {% endif %}
+      <span class="px-4 py-2 text-sm text-gray-500">
+        Página {{ resultados.number }} de {{ resultados.paginator.num_pages }}
+      </span>
+      {% if resultados.has_next %}
+        <a href="?tipo={{ tipo_actual }}&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}&page={{ resultados.next_page_number }}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm text-gray-600 hover:bg-gray-50 transition">
+          Siguiente →
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+</div>
+{% endblock %}

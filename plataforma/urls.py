@@ -40,4 +40,5 @@ urlpatterns = [
     path("grupos/<int:grupo_id>/", views.detalle_grupo, name="detalle_grupo"),
     path("grupos/<int:grupo_id>/unirse/", views.unirse_grupo, name="unirse_grupo"),
     path("grupos/<int:grupo_id>/salir/", views.salir_grupo, name="salir_grupo"),
+    path("explorar/", views.explorar, name="explorar"),
 ]

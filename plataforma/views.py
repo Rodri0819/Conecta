@@ -236,3 +236,39 @@ def salir_grupo(request, grupo_id):
     if request.method == 'POST':
         grupo.miembros.remove(request.user)
     return redirect(request.META.get('HTTP_REFERER') or reverse('plataforma:grupos'))
+
+
+# -----------------------------------------------------------------
+# EXPLORAR
+# -----------------------------------------------------------------
+
+@login_required(login_url='plataforma:login')
+def explorar(request):
+    tipo = request.GET.get('tipo', 'actividades')
+    q = request.GET.get('q')
+    categoria_id = request.GET.get('categoria')
+
+    if tipo == 'grupos':
+        qs = Grupo.objects.order_by('-creado_en')
+        if q:
+            qs = qs.filter(nombre__icontains=q)
+        if categoria_id:
+            qs = qs.filter(categoria_id=categoria_id)
+    else:
+        tipo = 'actividades'
+        qs = Actividad.objects.order_by('fecha')
+        if q:
+            qs = qs.filter(titulo__icontains=q)
+        if categoria_id:
+            qs = qs.filter(categoria_id=categoria_id)
+
+    paginator = Paginator(qs, 12)
+    page = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'plataforma/explorar.html', {
+        'resultados': page,
+        'categorias': Categoria.objects.all(),
+        'tipo_actual': tipo,
+        'q': q,
+        'categoria_actual': categoria_id,
+    })

@@ -68,9 +68,9 @@
         <a href="{% url 'plataforma:inicio' %}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'inicio' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
           <span class="text-lg">🏠</span> Inicio
-        </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
-          <span class="text-lg">🧭</span> Explorar
+        <a href="{% url 'plataforma:explorar' %}"
+        class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'explorar' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
+            <span class="text-lg">🧭</span> Explorar
         </a>
         <a href="{% url 'plataforma:actividades' %}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'actividades' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
