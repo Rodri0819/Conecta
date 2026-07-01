@@ -17,4 +17,27 @@ urlpatterns = [
         auth_views.LogoutView.as_view(next_page="plataforma:login"),
         name="logout",
     ),
+    path("actividades/", views.actividades, name="actividades"),
+    path("actividades/crear/", views.crear_actividad, name="crear_actividad"),
+    path(
+        "actividades/<int:actividad_id>/",
+        views.detalle_actividad,
+        name="detalle_actividad",
+    ),
+    path("mensajes/", views.mensajes, name="mensajes"),
+    path(
+        "mensajes/<int:conversacion_id>/enviar/",
+        views.enviar_mensaje,
+        name="enviar_mensaje",
+    ),
+    path(
+        "mensajes/iniciar/<int:usuario_id>/",
+        views.iniciar_conversacion,
+        name="iniciar_conversacion",
+    ),
+    path("grupos/", views.grupos, name="grupos"),
+    path("grupos/crear/", views.crear_grupo, name="crear_grupo"),
+    path("grupos/<int:grupo_id>/", views.detalle_grupo, name="detalle_grupo"),
+    path("grupos/<int:grupo_id>/unirse/", views.unirse_grupo, name="unirse_grupo"),
+    path("grupos/<int:grupo_id>/salir/", views.salir_grupo, name="salir_grupo"),
 ]

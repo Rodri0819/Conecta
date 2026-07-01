@@ -55,3 +55,36 @@ class Actividad(models.Model):
     @property
     def total_participantes(self):
         return self.participantes.count()
+
+class Conversacion(models.Model):
+    participantes = models.ManyToManyField(User, related_name='conversaciones')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        nombres = ", ".join(u.username for u in self.participantes.all())
+        return f"Conversación: {nombres}"
+
+    def otro_participante(self, usuario):
+        """Devuelve el otro usuario de una conversación 1 a 1."""
+        return self.participantes.exclude(id=usuario.id).first()
+
+
+class Mensaje(models.Model):
+    conversacion = models.ForeignKey(
+        Conversacion, on_delete=models.CASCADE, related_name='mensajes'
+    )
+    autor = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='mensajes_enviados'
+    )
+    contenido = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['fecha']
+
+    def __str__(self):
+        return f'{self.autor}: {self.contenido[:30]}'

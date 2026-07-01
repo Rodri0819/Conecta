@@ -66,20 +66,23 @@
       <!-- Navegación -->
       <nav class="flex flex-col gap-1 text-base text-gray-600">
         <a href="{% url 'plataforma:inicio' %}"
-           class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-50 text-brand-600 font-semibold transition">
+           class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'inicio' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
           <span class="text-lg">🏠</span> Inicio
         </a>
         <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
           <span class="text-lg">🧭</span> Explorar
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
+        <a href="{% url 'plataforma:actividades' %}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'actividades' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
           <span class="text-lg">📋</span> Actividades
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
-          <span class="text-lg">👥</span> Grupos
+        <a href="{% url 'plataforma:grupos' %}"
+         class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'grupos' or request.resolver_match.url_name == 'detalle_grupo' or request.resolver_match.url_name == 'crear_grupo' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
+            <span class="text-lg">👥</span> Grupos
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
-          <span class="text-lg">💬</span> Mensajes
+        <a href="{% url 'plataforma:mensajes' %}"
+        class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'mensajes' %}bg-brand-50 text-brand-600 font-semibold{% else %}hover:bg-gray-50{% endif %} transition">
+        <span class="text-lg">💬</span> Mensajes
         </a>
         <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
           <span class="text-lg">🔖</span> Guardados

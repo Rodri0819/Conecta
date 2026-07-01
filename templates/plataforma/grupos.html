@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-[1800px] mx-auto px-8 xl:px-12 py-8">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+    <div>
+      <h1 class="font-extrabold text-2xl text-gray-900">Grupos</h1>
+      <p class="text-sm text-gray-500 mt-1">Encuentra tu comunidad o crea la tuya.</p>
+    </div>
+    <a href="{% url 'plataforma:crear_grupo' %}"
+       class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition">
+      <span class="text-lg leading-none">+</span> Crear grupo
+    </a>
+  </div>
+
+  <!-- Filtros -->
+  <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+    <div class="flex gap-2 bg-white border border-gray-100 rounded-full p-1 shadow-sm">
+      <a href="?filtro=todos"
+         class="px-5 py-2 rounded-full text-sm font-semibold transition {% if filtro_actual == 'todos' %}bg-brand-500 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+        Todos
+      </a>
+      <a href="?filtro=mios"
+         class="px-5 py-2 rounded-full text-sm font-semibold transition {% if filtro_actual == 'mios' %}bg-brand-500 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+        Mis grupos
+      </a>
+    </div>
+
+    <form method="get" class="flex items-center gap-3 flex-1 max-w-md">
+      <input type="hidden" name="filtro" value="{{ filtro_actual }}">
+      <div class="relative flex-1">
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+        </div>
+        <input
+          type="text" name="q" value="{{ q|default:'' }}"
+          placeholder="Buscar grupos..."
+          class="w-full bg-white rounded-xl pl-10 pr-4 py-2.5 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"
+        >
+      </div>
+      <select name="categoria"
+              class="bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition"
+              onchange="this.form.submit()">
+        <option value="">Categoría</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.id }}" {% if categoria_actual == cat.id|stringformat:"s" %}selected{% endif %}>
+            {{ cat.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <!-- Grid de grupos -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {% for grupo in grupos %}
+      <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300">
+        <a href="{% url 'plataforma:detalle_grupo' grupo.id %}" class="block">
+          {% if grupo.imagen %}
+            <img src="{{ grupo.imagen.url }}" class="h-32 w-full object-cover">
+          {% else %}
+            <div class="h-32 w-full bg-gradient-to-br from-violet-400 to-brand-500 flex items-center justify-center">
+              <span class="text-3xl text-white font-bold">{{ grupo.nombre|slice:":1"|upper }}</span>
+            </div>
+          {% endif %}
+        </a>
+        <div class="p-4">
+          {% if grupo.categoria %}
+            <span class="inline-block text-xs font-bold uppercase tracking-wide text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full mb-2">
+              {{ grupo.categoria.icono|default:"⭐" }} {{ grupo.categoria.nombre }}
+            </span>
+          {% endif %}
+          <a href="{% url 'plataforma:detalle_grupo' grupo.id %}">
+            <p class="font-bold text-gray-900 text-base mb-1 leading-snug hover:text-brand-600 transition">{{ grupo.nombre }}</p>
+          </a>
+          <p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ grupo.descripcion|default:"Sin descripción." }}</p>
+
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-400 font-medium">{{ grupo.total_miembros }} miembro{{ grupo.total_miembros|pluralize }}</span>
+
+            {% if request.user in grupo.miembros.all %}
+              <form method="post" action="{% url 'plataforma:salir_grupo' grupo.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-red-50 hover:text-red-500 px-4 py-2 rounded-full transition">
+                  Salir
+                </button>
+              </form>
+            {% else %}
+              <form method="post" action="{% url 'plataforma:unirse_grupo' grupo.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-4 py-2 rounded-full transition">
+                  Unirse
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-span-full flex flex-col items-center justify-center text-center py-20">
+        <span class="text-4xl mb-3">👥</span>
+        <p class="font-semibold text-gray-900 mb-1">No hay grupos para mostrar</p>
+        <p class="text-sm text-gray-400 mb-5">
+          {% if filtro_actual == 'mios' %}Aún no te has unido a ningún grupo.{% else %}Sé el primero en crear uno.{% endif %}
+        </p>
+        <a href="{% url 'plataforma:crear_grupo' %}"
+           class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold text-sm transition">
+          + Crear grupo
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Paginación -->
+  {% if grupos.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-10">
+      {% if grupos.has_previous %}
+        <a href="?filtro={{ filtro_actual }}&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}&page={{ grupos.previous_page_number }}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm text-gray-600 hover:bg-gray-50 transition">
+          ← Anterior
+        </a>
+      {% endif %}
+      <span class="px-4 py-2 text-sm text-gray-500">
+        Página {{ grupos.number }} de {{ grupos.paginator.num_pages }}
+      </span>
+      {% if grupos.has_next %}
+        <a href="?filtro={{ filtro_actual }}&q={{ q|default:'' }}&categoria={{ categoria_actual|default:'' }}&page={{ grupos.next_page_number }}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm text-gray-600 hover:bg-gray-50 transition">
+          Siguiente →
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+</div>
+{% endblock %}

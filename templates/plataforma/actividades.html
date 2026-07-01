@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-[1800px] mx-auto px-8 xl:px-12 py-8">
+
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900">Actividades</h1>
+      <p class="text-gray-500 mt-1">Encuentra planes o crea el tuyo propio.</p>
+    </div>
+    <button onclick="abrirModalCrear()"
+            class="inline-flex items-center justify-center gap-2 bg-gradient-to-br from-brand-500 to-fuchsia-500 text-white font-semibold text-base px-6 py-3 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition duration-300 shrink-0">
+      <span class="text-lg leading-none">+</span> Crear actividad
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6 flex-wrap">
+    <a href="?filtro=todas"
+       class="px-5 py-2.5 rounded-full text-sm font-semibold transition {% if filtro_actual|default:'todas' == 'todas' %}bg-brand-500 text-white shadow-sm{% else %}bg-white text-gray-600 border border-gray-100 hover:border-brand-200{% endif %}">
+      Todas
+    </a>
+    <a href="?filtro=mias"
+       class="px-5 py-2.5 rounded-full text-sm font-semibold transition {% if filtro_actual == 'mias' %}bg-brand-500 text-white shadow-sm{% else %}bg-white text-gray-600 border border-gray-100 hover:border-brand-200{% endif %}">
+      Mis actividades
+    </a>
+    <a href="?filtro=inscrito"
+       class="px-5 py-2.5 rounded-full text-sm font-semibold transition {% if filtro_actual == 'inscrito' %}bg-brand-500 text-white shadow-sm{% else %}bg-white text-gray-600 border border-gray-100 hover:border-brand-200{% endif %}">
+      A las que voy
+    </a>
+  </div>
+
+  <!-- Barra de filtros -->
+  <form method="get" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5 mb-8 flex flex-col md:flex-row gap-3 md:items-center">
+    <div class="relative flex-1">
+      <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+        </svg>
+      </div>
+      <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
+             placeholder="Busca por nombre de actividad..."
+             class="w-full bg-[#f8f8fc] rounded-xl pl-12 pr-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition">
+    </div>
+
+    <select name="categoria"
+            class="bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition">
+      <option value="">Todas las categorías</option>
+      {% for cat in categorias %}
+        <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>
+          {{ cat.icono|default:"⭐" }} {{ cat.nombre }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <input type="date" name="fecha" value="{{ request.GET.fecha|default:'' }}"
+           class="bg-[#f8f8fc] rounded-xl px-4 py-3 text-sm border border-gray-100 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-400 transition">
+
+    <button type="submit"
+            class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-5 py-3 rounded-xl transition">
+      Filtrar
+    </button>
+    {% if request.GET.q or request.GET.categoria or request.GET.fecha %}
+      <a href="{% url 'plataforma:actividades' %}" class="text-sm font-semibold text-gray-400 hover:text-brand-500 transition text-center">
+        Limpiar
+      </a>
+    {% endif %}
+  </form>
+
+  <!-- Listado de actividades -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for act in actividades %}
+      <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300">
+        <div class="relative">
+          {% if act.imagen %}
+            <img src="{{ act.imagen.url }}" class="h-40 w-full object-cover">
+          {% else %}
+            <div class="h-40 w-full bg-gradient-to-br from-brand-100 to-purple-200 flex items-center justify-center">
+              <span class="text-3xl">🎉</span>
+            </div>
+          {% endif %}
+          <span class="absolute top-3 left-3 bg-white/90 text-brand-600 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full">
+            {{ act.categoria.nombre|default:"Actividad" }}
+          </span>
+          {% if act.cupo_maximo %}
+            <span class="absolute top-3 right-3 bg-gray-900/70 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+              {{ act.inscritos_count|default:0 }}/{{ act.cupo_maximo }} cupos
+            </span>
+          {% endif %}
+        </div>
+        <div class="p-4">
+          <p class="font-bold text-gray-900 text-base mb-1.5 leading-snug">{{ act.titulo }}</p>
+          <p class="text-sm text-gray-500 flex items-center gap-1.5">
+            <span>📅</span> {{ act.fecha|date:"D, j M · H:i" }}
+          </p>
+          {% if act.lugar %}
+            <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
+              <span>📍</span> {{ act.lugar }}
+            </p>
+          {% endif %}
+
+          <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center -space-x-2">
+              <div class="w-7 h-7 rounded-full bg-brand-300 border-2 border-white"></div>
+              <div class="w-7 h-7 rounded-full bg-fuchsia-300 border-2 border-white"></div>
+              <div class="w-7 h-7 rounded-full bg-violet-300 border-2 border-white"></div>
+            </div>
+            <a href="{% url 'plataforma:detalle_actividad' act.id %}"
+               class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-4 py-2 rounded-full transition">
+              Ver más
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-span-full bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+        <p class="text-4xl mb-3">🗓️</p>
+        <p class="text-gray-700 font-semibold mb-1">Aún no hay actividades</p>
+        <p class="text-sm text-gray-400 mb-5">Sé la primera persona en crear un plan por aquí.</p>
+        <button onclick="abrirModalCrear()"
+                class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition">
+          + Crear actividad
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if actividades.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-10">
+      {% if actividades.has_previous %}
+        <a href="?page={{ actividades.previous_page_number }}" class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm font-semibold text-gray-600 hover:border-brand-200 transition">←</a>
+      {% endif %}
+      <span class="px-4 py-2 rounded-xl bg-brand-500 text-white text-sm font-semibold">{{ actividades.number }} / {{ actividades.paginator.num_pages }}</span>
+      {% if actividades.has_next %}
+        <a href="?page={{ actividades.next_page_number }}" class="px-4 py-2 rounded-xl bg-white border border-gray-100 text-sm font-semibold text-gray-600 hover:border-brand-200 transition">→</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+</div>
+
+<!-- ===================================== -->
+<!-- MODAL: CREAR ACTIVIDAD -->
+<!-- ===================================== -->
+<div id="modalCrearActividad" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="cerrarModalCrear()"></div>
+
+  <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+
+      <div class="relative bg-gradient-to-br from-violet-700 via-brand-600 to-fuchsia-500 rounded-t-3xl p-7 text-white">
+        <button onclick="cerrarModalCrear()" class="absolute top-5 right-5 text-white/80 hover:text-white text-xl leading-none">✕</button>
+        <h2 class="text-2xl font-extrabold mb-1">Crea tu actividad</h2>
+        <p class="text-purple-100 text-sm">Comparte un plan y encuentra gente con tus mismos intereses.</p>
+      </div>
+
+      <form method="POST" action="{% url 'plataforma:crear_actividad' %}" enctype="multipart/form-data" class="p-7 space-y-5">
+        {% csrf_token %}
+
+        <div>
+          <label class="block mb-2 text-gray-700 font-semibold text-sm">Título</label>
+          <input type="text" name="titulo" required placeholder="Ej: Taller de acuarela"
+                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+        </div>
+
+        <div>
+          <label class="block mb-2 text-gray-700 font-semibold text-sm">Descripción</label>
+          <textarea name="descripcion" rows="3" placeholder="Cuenta de qué se trata la actividad..."
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-2 text-gray-700 font-semibold text-sm">Categoría</label>
+            <select name="categoria" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+              {% for cat in categorias %}
+                <option value="{{ cat.id }}">{{ cat.icono|default:"⭐" }} {{ cat.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block mb-2 text-gray-700 font-semibold text-sm">Cupo máximo</label>
+            <input type="number" name="cupo_maximo" min="1" placeholder="Ej: 20"
+                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-2 text-gray-700 font-semibold text-sm">Fecha</label>
+            <input type="date" name="fecha" required
+                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+          </div>
+          <div>
+            <label class="block mb-2 text-gray-700 font-semibold text-sm">Hora</label>
+            <input type="time" name="hora" required
+                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-2 text-gray-700 font-semibold text-sm">Lugar</label>
+          <input type="text" name="lugar" placeholder="Ej: Parque Central"
+                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition text-sm">
+        </div>
+
+        <div>
+          <label class="block mb-2 text-gray-700 font-semibold text-sm">Imagen (opcional)</label>
+          <input type="file" name="imagen" accept="image/*"
+                 class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100 transition">
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="cerrarModalCrear()"
+                  class="flex-1 px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-br from-brand-500 to-fuchsia-500 text-white font-semibold text-sm shadow-md hover:shadow-lg transition">
+            Publicar actividad
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function abrirModalCrear() {
+    document.getElementById('modalCrearActividad').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function cerrarModalCrear() {
+    document.getElementById('modalCrearActividad').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModalCrear();
+  });
+</script>
+{% endblock %}
