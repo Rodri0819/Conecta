@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import Actividad, Grupo
+from .models import Actividad, Grupo, Perfil
 
 
 INPUT_CLASSES = (
@@ -110,3 +110,23 @@ class ReporteForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 4}),
         label="Cuéntanos más (opcional)",
     )
+
+
+#Perfil Formulario para editar perfil
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = Perfil
+        fields = ['foto', 'bio', 'intereses']
+        widgets = {
+            'foto': forms.ClearableFileInput(attrs={
+                'class': 'text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl '
+                         'file:border-0 file:bg-brand-50 file:text-brand-600 file:font-semibold '
+                         'hover:file:bg-brand-100 transition',
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': INPUT_CLASSES,
+                'rows': 4,
+                'placeholder': 'Cuéntale a los demás quién eres y qué te apasiona...',
+            }),
+            'intereses': forms.CheckboxSelectMultiple(),
+        }

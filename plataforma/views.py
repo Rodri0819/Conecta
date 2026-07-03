@@ -9,7 +9,7 @@ from .models import (
     Actividad, Grupo, Categoria, Conversacion, Mensaje,
     Perfil, Reporte, Bloqueo,
 )
-from .forms import RegistroForm, ActividadForm, GrupoForm, ReporteForm
+from .forms import RegistroForm, ActividadForm, GrupoForm, ReporteForm, PerfilForm
 
 
 @login_required(login_url='plataforma:login')
@@ -95,10 +95,17 @@ def actividades(request):
 def crear_actividad(request):
     if request.method == 'POST':
         form = ActividadForm(request.POST, request.FILES)
+        grupo_id = request.POST.get('grupo')
+
         if form.is_valid():
             actividad = form.save(commit=False)
             actividad.organizador = request.user
             actividad.save()
+            if actividad.grupo:
+                return redirect('plataforma:detalle_grupo', grupo_id=actividad.grupo.id)
+        elif grupo_id:
+            return redirect('plataforma:detalle_grupo', grupo_id=grupo_id)
+
     return redirect('plataforma:actividades')
 
 
@@ -237,14 +244,15 @@ def crear_grupo(request):
     if request.method == 'POST':
         form = GrupoForm(request.POST, request.FILES)
         if form.is_valid():
-            grupo = form.save()
+            grupo = form.save(commit=False)
+            grupo.creador = request.user
+            grupo.save()
             grupo.miembros.add(request.user)
             return redirect('plataforma:detalle_grupo', grupo_id=grupo.id)
     else:
         form = GrupoForm()
 
     return render(request, 'plataforma/crear_grupo.html', {'form': form})
-
 
 @login_required(login_url='plataforma:login')
 def detalle_grupo(request, grupo_id):
@@ -271,6 +279,28 @@ def salir_grupo(request, grupo_id):
     if request.method == 'POST':
         grupo.miembros.remove(request.user)
     return redirect(request.META.get('HTTP_REFERER') or reverse('plataforma:grupos'))
+
+@login_required(login_url='plataforma:login')
+def eliminar_grupo(request, grupo_id):
+    grupo = get_object_or_404(Grupo, id=grupo_id)
+    if request.method == 'POST' and grupo.creador == request.user:
+        grupo.delete()
+        django_messages.success(request, 'Grupo eliminado correctamente.')
+        return redirect('plataforma:grupos')
+    return redirect('plataforma:detalle_grupo', grupo_id=grupo.id)
+
+
+@login_required(login_url='plataforma:login')
+def eliminar_actividad(request, actividad_id):
+    actividad = get_object_or_404(Actividad, id=actividad_id)
+    if request.method == 'POST' and actividad.organizador == request.user:
+        grupo_id = actividad.grupo.id if actividad.grupo else None
+        actividad.delete()
+        django_messages.success(request, 'Actividad eliminada correctamente.')
+        if grupo_id:
+            return redirect('plataforma:detalle_grupo', grupo_id=grupo_id)
+        return redirect('plataforma:actividades')
+    return redirect('plataforma:detalle_actividad', actividad_id=actividad.id)
 
 
 # -----------------------------------------------------------------
@@ -357,3 +387,38 @@ def desbloquear_usuario(request, usuario_id):
         django_messages.success(request, 'Usuario desbloqueado.')
 
     return redirect(request.META.get('HTTP_REFERER') or reverse('plataforma:mensajes'))
+
+
+# -----------------------------------------------------------------
+# Perfil
+# -----------------------------------------------------------------
+@login_required(login_url='plataforma:login')
+def perfil(request, usuario_id):
+    usuario = get_object_or_404(User, id=usuario_id)
+    perfil = get_object_or_404(Perfil, user=usuario)
+    es_propio = (usuario == request.user)
+
+    mostrar_formulario = es_propio and (request.method == 'POST' or request.GET.get('editar') == '1')
+
+    if request.method == 'POST' and es_propio:
+        form = PerfilForm(request.POST, request.FILES, instance=perfil)
+        if form.is_valid():
+            form.save()
+            return redirect('plataforma:perfil', usuario_id=usuario.id)
+    else:
+        form = PerfilForm(instance=perfil)
+
+    grupos_qs = usuario.grupos.all()
+    actividades_qs = usuario.actividades_creadas.order_by('-fecha')
+
+    return render(request, 'plataforma/perfil.html', {
+        'perfil': perfil,
+        'usuario_perfil': usuario,
+        'es_propio': es_propio,
+        'form': form,
+        'mostrar_formulario': mostrar_formulario,
+        'grupos_usuario': grupos_qs[:4],
+        'total_grupos': grupos_qs.count(),
+        'actividades_usuario': actividades_qs[:4],
+        'total_actividades': actividades_qs.count(),
+    })

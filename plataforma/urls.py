@@ -46,4 +46,11 @@ urlpatterns = [
     path("usuarios/<int:usuario_id>/reportar/", views.reportar_usuario, name="reportar_usuario"),
     path("usuarios/<int:usuario_id>/bloquear/", views.bloquear_usuario, name="bloquear_usuario"),
     path("usuarios/<int:usuario_id>/desbloquear/", views.desbloquear_usuario, name="desbloquear_usuario"),
+
+    #Perfil
+    path("perfil/<int:usuario_id>/", views.perfil, name="perfil"),
+
+    # Eliminación de grupos y actividades
+    path("grupos/<int:grupo_id>/eliminar/", views.eliminar_grupo, name="eliminar_grupo"),
+    path("actividades/<int:actividad_id>/eliminar/", views.eliminar_actividad, name="eliminar_actividad"),
 ]

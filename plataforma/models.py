@@ -50,6 +50,7 @@ class Grupo(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     imagen = models.ImageField(upload_to='grupos/', blank=True, null=True)
     miembros = models.ManyToManyField(User, related_name='grupos', blank=True)
+    creador = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='grupos_creados')
     creado_en = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

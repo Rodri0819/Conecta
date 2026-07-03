@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-[1800px] mx-auto px-8 xl:px-12 py-8">
+
+  <a href="{% url 'plataforma:inicio' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-brand-600 transition mb-6">
+    ← Volver a inicio
+  </a>
+
+  <!-- Portada -->
+  <div class="relative rounded-3xl h-32 bg-gradient-to-br from-violet-600 via-brand-600 to-fuchsia-500 mb-16">
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+    <!-- Columna lateral: identidad -->
+    <div class="lg:col-span-1 -mt-16">
+      <div class="bg-white rounded-2xl p-6 pt-0 border border-gray-100 shadow-sm text-center">
+
+        {% if perfil.foto %}
+          <img src="{{ perfil.foto.url }}" class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-white shadow-md -translate-y-1/2">
+        {% else %}
+          <div class="w-28 h-28 rounded-full bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center text-white text-3xl font-bold mx-auto border-4 border-white shadow-md -translate-y-1/2">
+            {{ usuario_perfil.first_name|default:usuario_perfil.username|first|upper }}
+          </div>
+        {% endif %}
+
+        <h1 class="font-extrabold text-xl text-gray-900 -mt-8">
+          {{ usuario_perfil.first_name|default:usuario_perfil.username }}
+        </h1>
+        <p class="text-sm text-gray-400">
+          @{{ usuario_perfil.username }}{% if perfil.edad %} · {{ perfil.edad }} años{% endif %}
+        </p>
+
+        {% if perfil.verificado %}
+          <span class="inline-block mt-3 text-xs font-bold uppercase tracking-wide text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
+            ✓ Verificado
+          </span>
+        {% endif %}
+
+        {% if not es_propio %}
+          <div class="flex flex-col gap-2 mt-6">
+            <a href="{% url 'plataforma:iniciar_conversacion' usuario_perfil.id %}"
+               class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-5 py-2.5 rounded-full transition">
+              Enviar mensaje
+            </a>
+            <div class="flex gap-2">
+              <a href="{% url 'plataforma:reportar_usuario' usuario_perfil.id %}"
+                 class="flex-1 text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-4 py-2.5 rounded-full transition text-center">
+                Reportar
+              </a>
+              <form method="post" action="{% url 'plataforma:bloquear_usuario' usuario_perfil.id %}" class="flex-1">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-red-50 hover:text-red-500 px-4 py-2.5 rounded-full transition">
+                  Bloquear
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Columna principal -->
+    <div class="lg:col-span-2">
+
+      {% if mostrar_formulario %}
+        <!-- Formulario de edición -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-bold text-lg text-gray-900">Editar mi perfil</h2>
+            <a href="{% url 'plataforma:perfil' usuario_perfil.id %}"
+               class="text-sm font-semibold text-gray-400 hover:text-gray-600 transition">
+              Cancelar
+            </a>
+          </div>
+          <p class="text-sm text-gray-500 mb-6">Así te verán las demás personas.</p>
+
+          <form method="post" enctype="multipart/form-data" class="flex flex-col gap-5">
+            {% csrf_token %}
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Foto de perfil</label>
+              {{ form.foto }}
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Biografía</label>
+              {{ form.bio }}
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Intereses</label>
+              <div class="grid grid-cols-2 gap-2 bg-[#f8f8fc] rounded-xl p-4 border border-gray-100">
+                {% for checkbox in form.intereses %}
+                  <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    {{ checkbox.tag }}
+                    {{ checkbox.choice_label }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-2">
+              <button type="submit"
+                      class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      {% else %}
+        <!-- Vista de solo lectura -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-bold text-lg text-gray-900">Sobre mí</h2>
+            {% if es_propio %}
+              <a href="?editar=1"
+                 class="text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-full transition">
+                Modificar perfil
+              </a>
+            {% endif %}
+          </div>
+          <p class="text-base text-gray-600 leading-relaxed">
+            {{ perfil.bio|default:"Esta persona aún no ha escrito una biografía." }}
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- Intereses (vista de lectura, visible en ambos casos) -->
+      <div class="mt-8">
+        <h2 class="font-bold text-lg text-gray-900 mb-4">Intereses</h2>
+        <div class="flex flex-wrap gap-2">
+          {% for interes in perfil.intereses.all %}
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full">
+              {{ interes.icono|default:"⭐" }} {{ interes.nombre }}
+            </span>
+          {% empty %}
+            <p class="text-sm text-gray-400">Aún no hay intereses seleccionados.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Grupos -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg text-gray-900">Grupos <span class="text-gray-400 font-normal">({{ total_grupos }})</span></h2>
+          {% if total_grupos > 4 %}
+            <a href="{% url 'plataforma:grupos' %}?filtro=mios" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition">
+              Ver todos →
+            </a>
+          {% endif %}
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {% for grupo in grupos_usuario %}
+            <a href="{% url 'plataforma:detalle_grupo' grupo.id %}"
+               class="flex items-center gap-3 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200">
+              {% if grupo.imagen %}
+                <img src="{{ grupo.imagen.url }}" class="w-12 h-12 rounded-xl object-cover shrink-0">
+              {% else %}
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center text-white font-bold shrink-0">
+                  {{ grupo.nombre|slice:":1"|upper }}
+                </div>
+              {% endif %}
+              <div class="min-w-0">
+                <p class="font-semibold text-sm text-gray-900 truncate">{{ grupo.nombre }}</p>
+                <p class="text-xs text-gray-400">{{ grupo.total_miembros }} miembro{{ grupo.total_miembros|pluralize }}</p>
+              </div>
+            </a>
+          {% empty %}
+            <p class="text-sm text-gray-400 col-span-2">
+              {% if es_propio %}Aún no te has unido a ningún grupo.{% else %}Esta persona aún no se ha unido a ningún grupo.{% endif %}
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Actividades organizadas -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg text-gray-900">Actividades organizadas <span class="text-gray-400 font-normal">({{ total_actividades }})</span></h2>
+          {% if total_actividades > 4 %}
+            <a href="{% url 'plataforma:actividades' %}?filtro=mias" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition">
+              Ver todas →
+            </a>
+          {% endif %}
+        </div>
+        <div class="flex flex-col gap-3">
+          {% for actividad in actividades_usuario %}
+            <a href="{% url 'plataforma:detalle_actividad' actividad.id %}"
+               class="flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-100 to-purple-200 flex items-center justify-center text-xl shrink-0">
+                🎉
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-sm text-gray-900 truncate">{{ actividad.titulo }}</p>
+                <p class="text-xs text-gray-400">{{ actividad.fecha|date:"D, j M · H:i" }}{% if actividad.lugar %} · {{ actividad.lugar }}{% endif %}</p>
+              </div>
+              <span class="text-xs font-semibold text-gray-400 shrink-0">{{ actividad.total_participantes }} 👥</span>
+            </a>
+          {% empty %}
+            <p class="text-sm text-gray-400">
+              {% if es_propio %}Aún no has organizado ninguna actividad.{% else %}Esta persona aún no ha organizado actividades.{% endif %}
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+{% endblock %}

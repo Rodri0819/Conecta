@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#f8f8fc] min-h-screen">
+<div class="max-w-[1800px] mx-auto px-8 xl:px-12 py-8">
+
+  <a href="{% url 'plataforma:actividades' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-brand-600 transition mb-6">
+    ← Volver a actividades
+  </a>
+
+  <!-- Portada -->
+  <div class="relative rounded-3xl overflow-hidden mb-8 shadow-sm">
+    {% if actividad.imagen %}
+      <img src="{{ actividad.imagen.url }}" class="h-56 w-full object-cover">
+    {% else %}
+      <div class="h-56 w-full bg-gradient-to-br from-brand-100 to-purple-200 flex items-center justify-center">
+        <span class="text-6xl">🎉</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+    <!-- Columna principal -->
+    <div class="lg:col-span-2">
+      <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
+        <div>
+          {% if actividad.categoria %}
+            <span class="inline-block text-xs font-bold uppercase tracking-wide text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full mb-3">
+              {{ actividad.categoria.icono|default:"⭐" }} {{ actividad.categoria.nombre }}
+            </span>
+          {% endif %}
+          <h1 class="font-extrabold text-2xl text-gray-900">{{ actividad.titulo }}</h1>
+          <p class="text-sm text-gray-400 mt-1">
+            📅 {{ actividad.fecha|date:"D, j M · H:i" }}
+            {% if actividad.lugar %} · 📍 {{ actividad.lugar }}{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <p class="text-base text-gray-600 leading-relaxed mb-10">
+        {{ actividad.descripcion|default:"Esta actividad aún no tiene descripción." }}
+      </p>
+        {% if actividad.organizador == request.user %}
+            <form method="post" action="{% url 'plataforma:eliminar_actividad' actividad.id %}"
+                    onsubmit="return confirm('¿Seguro que quieres eliminar esta actividad?');">
+                {% csrf_token %}
+                <button type="submit"
+                        class="text-sm font-semibold text-red-500 bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-full transition">
+                Eliminar actividad
+                </button>
+            </form>
+        {% endif %} 
+
+      {% if actividad.grupo %}
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-8">
+          <p class="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Organizada por el grupo</p>
+          <a href="{% url 'plataforma:detalle_grupo' actividad.grupo.id %}"
+             class="inline-flex items-center gap-3 hover:text-brand-600 transition">
+            {% if actividad.grupo.imagen %}
+              <img src="{{ actividad.grupo.imagen.url }}" class="w-10 h-10 rounded-xl object-cover">
+            {% else %}
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center text-white font-bold">
+                {{ actividad.grupo.nombre|slice:":1"|upper }}
+              </div>
+            {% endif %}
+            <span class="font-semibold text-sm text-gray-900">{{ actividad.grupo.nombre }}</span>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Columna lateral: organizador + participantes -->
+    <div class="lg:col-span-1 flex flex-col gap-6">
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <h3 class="font-bold text-lg text-gray-900 mb-4">Organizador</h3>
+        <a href="{% url 'plataforma:perfil' actividad.organizador.id %}"
+           class="flex items-center gap-3 hover:text-brand-600 transition">
+          <div class="w-11 h-11 rounded-full bg-gradient-to-br from-brand-400 to-fuchsia-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+            {{ actividad.organizador.first_name|default:actividad.organizador.username|first|upper }}
+          </div>
+          <p class="text-sm font-medium text-gray-700">
+            {{ actividad.organizador.first_name|default:actividad.organizador.username }}
+          </p>
+        </a>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <h3 class="font-bold text-lg text-gray-900 mb-5">
+          Participantes ({{ actividad.total_participantes }})
+        </h3>
+        <div class="flex flex-col gap-4">
+          {% for participante in actividad.participantes.all|slice:":10" %}
+            <a href="{% url 'plataforma:perfil' participante.id %}"
+               class="flex items-center gap-3 hover:text-brand-600 transition">
+              <div class="w-10 h-10 bg-gradient-to-br from-brand-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                {{ participante.first_name|default:participante.username|first|upper }}
+              </div>
+              <p class="text-sm font-medium text-gray-700 truncate">
+                {{ participante.first_name|default:participante.username }}
+              </p>
+            </a>
+          {% empty %}
+            <p class="text-sm text-gray-400">Aún no hay participantes.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+{% endblock %}

@@ -39,24 +39,19 @@
           <div class="md:col-span-2 hidden md:flex justify-center">
             <svg viewBox="0 0 280 220" class="w-full max-w-[280px] floating" xmlns="http://www.w3.org/2000/svg">
               <ellipse cx="140" cy="195" rx="110" ry="14" fill="rgba(0,0,0,0.08)"/>
-              <!-- planta -->
               <path d="M28 190 v-38" stroke="#d9f99d" stroke-width="5" stroke-linecap="round"/>
               <ellipse cx="20" cy="145" rx="16" ry="9" fill="#bef264" transform="rotate(-20 20 145)"/>
               <ellipse cx="38" cy="150" rx="16" ry="9" fill="#a3e635" transform="rotate(20 38 150)"/>
-              <!-- persona guitarra -->
               <circle cx="95" cy="120" r="20" fill="#fbbf6b"/>
               <path d="M65 192 Q95 150 125 192 Z" fill="#f5f3ff"/>
               <ellipse cx="108" cy="168" rx="16" ry="22" fill="#7e22ce" transform="rotate(18 108 168)"/>
               <circle cx="108" cy="150" r="6" fill="#581c87"/>
-              <!-- persona centro -->
               <circle cx="150" cy="108" r="22" fill="#fde68a"/>
               <path d="M115 195 Q150 148 185 195 Z" fill="#ffffff"/>
               <rect x="140" y="130" width="20" height="26" rx="6" fill="#f472b6"/>
-              <!-- persona libro -->
               <circle cx="205" cy="122" r="20" fill="#fca5a5"/>
               <path d="M175 192 Q205 152 235 192 Z" fill="#f5f3ff"/>
               <rect x="190" y="150" width="30" height="20" rx="3" fill="#fef3c7" transform="rotate(-8 205 160)"/>
-              <!-- iconos flotantes -->
               <circle cx="55" cy="55" r="17" fill="#ffffff" opacity="0.95"/>
               <text x="55" y="61" font-size="17" text-anchor="middle">🎮</text>
               <circle cx="140" cy="30" r="17" fill="#ffffff" opacity="0.95"/>
@@ -71,13 +66,14 @@
       <!-- Categorías -->
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold text-xl text-gray-900">Explora por categorías</h2>
-        <a href="#" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todas</a>
+        <a href="{% url 'plataforma:explorar' %}" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todas</a>
       </div>
       <div class="flex gap-3 mb-12 flex-wrap">
         {% for cat in categorias %}
-          <div class="bg-white px-5 py-3 rounded-full text-base text-gray-700 font-medium flex items-center gap-2 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand-200 transition duration-300 cursor-pointer">
+          <a href="{% url 'plataforma:explorar' %}?categoria={{ cat.id }}"
+             class="bg-white px-5 py-3 rounded-full text-base text-gray-700 font-medium flex items-center gap-2 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand-200 transition duration-300 cursor-pointer">
             <span class="text-lg">{{ cat.icono|default:"⭐" }}</span> {{ cat.nombre }}
-          </div>
+          </a>
         {% empty %}
           <p class="text-sm text-gray-400">Aún no hay categorías. Agrégalas desde el admin.</p>
         {% endfor %}
@@ -86,11 +82,12 @@
       <!-- Recomendaciones -->
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold text-xl text-gray-900">Recomendaciones para ti</h2>
-        <a href="#" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver más</a>
+        <a href="{% url 'plataforma:actividades' %}" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver más</a>
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-5">
         {% for act in recomendaciones %}
-          <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 cursor-pointer">
+          <a href="{% url 'plataforma:detalle_actividad' act.id %}"
+             class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 cursor-pointer block">
             <div class="relative">
               {% if act.imagen %}
                 <img src="{{ act.imagen.url }}" class="h-36 w-full object-cover">
@@ -116,7 +113,7 @@
                 <span class="pl-3.5 text-xs text-gray-400 font-medium">+5</span>
               </div>
             </div>
-          </div>
+          </a>
         {% empty %}
           <p class="text-sm text-gray-400 col-span-3">Aún no hay actividades creadas.</p>
         {% endfor %}
@@ -133,11 +130,11 @@
       <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
         <div class="flex items-center justify-between mb-5">
           <h3 class="font-bold text-lg text-gray-900">Próximos eventos</h3>
-          <a href="#" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todos</a>
+          <a href="{% url 'plataforma:actividades' %}" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todos</a>
         </div>
         <div class="flex flex-col gap-5">
           {% for ev in proximos_eventos %}
-            <div class="flex gap-4 items-center">
+            <a href="{% url 'plataforma:detalle_actividad' ev.id %}" class="flex gap-4 items-center hover:opacity-80 transition">
               <div class="w-14 h-14 bg-gradient-to-br from-brand-400 to-fuchsia-400 rounded-xl shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-sm">
                 {{ ev.titulo|slice:":1"|upper }}
               </div>
@@ -145,7 +142,7 @@
                 <p class="text-base font-semibold text-gray-900 leading-snug truncate">{{ ev.titulo }}</p>
                 <p class="text-sm text-gray-500">{{ ev.fecha|date:"j \d\e M · H:i" }}</p>
               </div>
-            </div>
+            </a>
           {% empty %}
             <p class="text-sm text-gray-400">No hay eventos próximos.</p>
           {% endfor %}
@@ -156,12 +153,12 @@
       <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
         <div class="flex items-center justify-between mb-5">
           <h3 class="font-bold text-lg text-gray-900">Grupos sugeridos</h3>
-          <a href="#" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todos</a>
+          <a href="{% url 'plataforma:grupos' %}" class="text-sm font-semibold text-brand-500 hover:text-brand-600">Ver todos</a>
         </div>
         <div class="flex flex-col gap-5">
           {% for g in grupos_sugeridos %}
             <div class="flex items-center justify-between gap-3">
-              <div class="flex gap-3 items-center min-w-0">
+              <a href="{% url 'plataforma:detalle_grupo' g.id %}" class="flex gap-3 items-center min-w-0 hover:opacity-80 transition">
                 <div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-brand-500 rounded-full shrink-0 flex items-center justify-center text-white font-bold text-base">
                   {{ g.nombre|slice:":1"|upper }}
                 </div>
@@ -169,10 +166,20 @@
                   <p class="text-base font-semibold text-gray-900 truncate">{{ g.nombre }}</p>
                   <p class="text-sm text-gray-500">{{ g.total_miembros }} miembros</p>
                 </div>
-              </div>
-              <button class="shrink-0 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-4 py-2 rounded-full transition">
-                Unirse
-              </button>
+              </a>
+              {% if request.user in g.miembros.all %}
+                <span class="shrink-0 text-sm font-semibold text-gray-400 px-4 py-2">
+                  Ya eres miembro
+                </span>
+              {% else %}
+                <form method="post" action="{% url 'plataforma:unirse_grupo' g.id %}" class="shrink-0">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 px-4 py-2 rounded-full transition">
+                    Unirse
+                  </button>
+                </form>
+              {% endif %}
             </div>
           {% empty %}
             <p class="text-sm text-gray-400">No hay grupos sugeridos.</p>

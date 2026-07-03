@@ -159,6 +159,7 @@
 
       <form method="POST" action="{% url 'plataforma:crear_actividad' %}" enctype="multipart/form-data" class="p-7 space-y-5">
         {% csrf_token %}
+        <input type="hidden" name="grupo" id="grupoSeleccionado" value="">
 
         <div>
           <label class="block mb-2 text-gray-700 font-semibold text-sm">Título</label>
@@ -233,12 +234,31 @@
     document.getElementById('modalCrearActividad').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
+
   function cerrarModalCrear() {
-    document.getElementById('modalCrearActividad').classList.add('hidden');
-    document.body.style.overflow = '';
+    const params = new URLSearchParams(window.location.search);
+    const grupoId = params.get('grupo_id');
+
+    if (grupoId) {
+      // Si on est arrivé depuis un groupe, on y retourne en fermant
+      window.location.href = "/grupos/" + grupoId + "/";
+    } else {
+      document.getElementById('modalCrearActividad').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
   }
+
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') cerrarModalCrear();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    const grupoId = params.get('grupo_id');
+    if (grupoId) {
+      document.getElementById('grupoSeleccionado').value = grupoId;
+      abrirModalCrear();
+    }
   });
 </script>
 {% endblock %}
